@@ -1,0 +1,73 @@
+---
+title: "Multi-Analysis"
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = T, eval = T, cache = F, warning = T, message = T)
+library(tidyverse)
+library(dplyr)
+library(tidyr)
+library(lme4)
+library(MASS)  
+library(data.table)
+library(Matrix)
+ggplot2::theme_set(ggplot2::theme_bw())
+knitr::opts_chunk$set(out.width = "100%", fig.align = 'center')
+```
+
+
+```{r}
+source("DGP.R")
+H = 5                                # number of sites
+m_hosp = sample(10:50, H, replace=TRUE) # patients per site (vector length H)
+px = 6                               # number of covariates
+p_bin = 3                            # number of binary covariates
+py = 3                               # number of outcomes
+beta = matrix(runif(px*py, 1, 10), nrow = px, ncol = py) # fixed effects
+sigma_u = 0.2                        # site RE sd
+sigma_e = 0.5                        # residual sd (per outcome)
+rho = 0.3                            # exchangeable residual correlation across outcomes
+
+dat <- generate_data_mv(seed = 123, H, m_hosp, px, p_bin, py, beta, sigma_u, sigma_e, rho)
+dat
+```
+
+```{r}
+# naive long format fitting
+fit_lmer_long <- function(dat, px) {
+  dat$site <- factor(dat$site)
+
+  long <- dat %>%
+    pivot_longer(cols = starts_with("Y"),
+                 names_to = "outcome", values_to = "Y") %>%
+    mutate(outcome = factor(outcome))
+
+  # Outcome-specific intercepts & slopes: outcome + outcome:(X1+...+Xp)
+  x_terms <- paste(paste0("X", 1:px), collapse = " + ")
+  fml <- as.formula(
+    paste0("Y ~ -1 + outcome:(", x_terms, ") + (1 | site)")
+  )
+
+  # (0 + outcome | site) gives a random intercept PER outcome at each site,
+  # with an estimated covariance matrix across outcomes at the site level.
+  lmer(fml, data = long, REML = TRUE, control = lmerControl(optimizer = "bobyqa"))
+}
+
+# Example:
+fit_long <- fit_lmer_long(dat, px = px)
+summary(fit_long)
+VarCorr(fit_long)$site   # 3x3 random-effects covariance across outcomes at site
+```
+
+```{r}
+beta
+fixef(fit_long) %>% matrix(nrow = px, ncol = py, byrow = T)
+
+
+sigma_u = 0.2                        # site RE sd
+sigma_e = 0.3                        # residual sd (per outcome)
+rho = 0.3  
+VarCorr(fit_long)
+```
+
