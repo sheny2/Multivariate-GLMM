@@ -57,7 +57,7 @@ fit_lmer_long <- function(dat, px) {
 # Example:
 fit_long <- fit_lmer_long(dat, px = px)
 summary(fit_long)
-VarCorr(fit_long)$site   # 3x3 random-effects covariance across outcomes at site
+VarCorr(fit_long)  
 ```
 
 ```{r}
