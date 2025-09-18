@@ -110,6 +110,6 @@ sigma_est_bias <- sigma_df %>% mutate(Bias = Estimate - True_Value) %>%
   geom_boxplot(fill = "lightblue", alpha = 0.6) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-ggsave("sigma_est_bias.png", sigma_est_bias, width = 10, height = 4, dpi = 300)
+ggsave("sigma_est_bias.png", sigma_est_bias, width = 4, height = 4, dpi = 300)
 
 
