@@ -238,7 +238,7 @@ peal_profile_exch_RI <- function(Y, X, id.site, Z = NULL,
   structure(list(
     beta   = beta_hat,
     sigma2 = sigma2_hat,
-    sigma_b2 = tau2_hat,
+    sigma_u2 = tau2_hat,
     rho    = rho_hat,
     logLik = as.numeric(logLik_hat),
     convergence = opt$convergence,
@@ -255,8 +255,8 @@ print.peal_profile_exch_RI <- function(x, ...) {
   cat(sprintf("  Outcomes (R): %d\n", x$R))
   cat(sprintf("  logLik: %.3f  |  convergence: %s\n",
               x$logLik, as.character(x$convergence)))
-  cat(sprintf("  sigma^2: %.6f,  sigma_b^2: %.6f,  rho: %.6f\n",
-              x$sigma2, x$sigma_b2, x$rho))
+  cat(sprintf("  sigma^2: %.6f,  sigma_u^2: %.6f,  rho: %.6f\n",
+              x$sigma2, x$sigma_u2, x$rho))
   cat("  beta (stacked by outcomes):\n")
   print(drop(x$beta))
   invisible(x)

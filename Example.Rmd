@@ -19,7 +19,7 @@ knitr::opts_chunk$set(out.width = "100%", fig.align = 'center')
 
 ```{r}
 source("DGP.R")
-H = 20                                # number of sites
+H = 10                                # number of sites
 m_hosp = sample(10:50, H, replace=TRUE) # patients per site (vector length H)
 px = 6                               # number of covariates
 p_bin = 3                            # number of binary covariates
@@ -43,7 +43,7 @@ id.site <- dat$site
 fit <- peal_profile_exch_RI(Y = Y, X = X, id.site = id.site)
 fit$beta %>% matrix(nrow = px, ncol = py, byrow = F)
 
-sqrt(fit$sigma_b2)
+sqrt(fit$sigma_u2)
 sqrt(fit$sigma2)
 fit$rho
 ```
