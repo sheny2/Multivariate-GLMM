@@ -21,17 +21,20 @@ knitr::opts_chunk$set(out.width = "100%", fig.align = 'center')
 source("DGP_RS.R")
 H = 10                                # number of sites
 m_hosp = sample(10:50, H, replace=TRUE) # patients per site (vector length H)
-px = 6                               # number of covariates
-p_bin = 0                            # number of binary covariates
+px = 6                              # number of covariates
+p_bin = 3                            # number of binary covariates
 py = 3                               # number of outcomes
 beta = matrix(runif(px*py, 1, 10), nrow = px, ncol = py) # fixed effects
-sigma_u = 0.4                        # site RE sd
+sigma_u = 1.5                        # site RE sd
 sigma_e = 0.5                        # residual sd (per outcome)
 tau = 0.8
-rho = 0.3                            # exchangeable residual correlation across outcomes
+rho = 0.5                            # exchangeable residual correlation across outcomes
 
-dat <- generate_data_mv(seed = 54236, H, m_hosp, px, p_bin, py, beta, sigma_u, sigma_e, rho, tau = tau)
+dat <- generate_data_mv(seed = 123567, H, m_hosp, px, p_bin, py, beta, sigma_u, sigma_e, rho, 
+                        rs_idx = c(4,5,6),
+                        tau = tau)
 dat
+beta
 ```
 
 ```{r}
@@ -43,6 +46,7 @@ id.site <- dat$site
 
 fit <- peal_profile_exch_RI_RS(Y = Y,
                                X = X,
+                                rs_idx = c(4,5,6),
                                id.site = id.site)
 
 
@@ -53,7 +57,5 @@ fit$rho
 
 sqrt(fit$tau0_2_int)
 sqrt(fit$tau2_slope)
-
-fit
 ```
 
