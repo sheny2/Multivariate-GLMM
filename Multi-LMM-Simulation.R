@@ -42,7 +42,7 @@ results <- foreach(k = 1:N, .packages = c("data.table", "dplyr", "MASS")) %dopar
   X <- as.matrix(dat[, paste0("X", 1:6)])
   id.site <- dat$site
 
-  fit <- peal_profile_exch_RI(Y = Y, X = X, id.site = id.site)
+  # fit <- peal_profile_exch_RI(Y = Y, X = X, id.site = id.site)
 
   fit <- tryCatch(
     {
