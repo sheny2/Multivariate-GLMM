@@ -33,8 +33,9 @@ dat <- generate_data_mv(seed = 12345, H, m_hosp, px, p_bin, py, beta, sigma_u, s
 dat
 ```
 
-```{r}
-source("Multi-LMM.R")
+
+```{r, eval = F}
+source("Multi-LMM-Q.R")
 
 Y <- as.matrix(dat[, paste0("Y", 1:3)])
 X <- as.matrix(dat[, paste0("X", 1:6)])
@@ -47,8 +48,10 @@ sqrt(fit$sigma_u2)
 sqrt(fit$sigma2)
 fit$rho
 ```
+
+
 ```{r}
-source("Multi-LMM2.R") # build likelihood as its original form
+source("Multi-LMM.R") # build likelihood as its original form
 
 Y <- as.matrix(dat[, paste0("Y", 1:3)])
 X <- as.matrix(dat[, paste0("X", 1:6)])
