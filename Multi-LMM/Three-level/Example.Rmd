@@ -19,8 +19,8 @@ knitr::opts_chunk$set(out.width = "100%", fig.align = 'center')
 
 ```{r}
 source("DGP-3.R")
-H = 10                                # number of sites
-m_hosp = sample(10:50, H, replace=TRUE) # patients per site (vector length H)
+H = 3                                # number of sites
+m_hosp = sample(10:30, H, replace=TRUE) # patients per site (vector length H)
 px = 6                               # number of covariates
 p_bin = 3                            # number of binary covariates
 py = 3                               # number of outcomes
@@ -44,15 +44,15 @@ dat <- generate_data_mv3(
     rho = rho,                               # exchangeable residual correlation across outcomes
     # ---- visits ----
     visits_range = c(1, 20),                 # inclusive range for number of visits per patient
-    # ---- optional random slopes at site level (like your previous template) ----
-    rs_idx = integer(0),                     # indices of X with site-level random slopes (subset of 1:px)
-    tau = 0.15,                              # sd(s) for random slopes (scalar or length(rs_idx))
-    slope_by_outcome = FALSE,                # if TRUE, slopes differ by outcome; else shared across outcomes
-    # ---- outcome-specific X? (your original DGP shared X across outcomes) ----
-    outcome_specific_X = FALSE               # if TRUE, draw a different X for each outcome (still stored once)
+    # # ---- optional random slopes at site level (like your previous template) ----
+    # rs_idx = integer(0),                     # indices of X with site-level random slopes (subset of 1:px)
+    # tau = 0.15,                              # sd(s) for random slopes (scalar or length(rs_idx))
+    # slope_by_outcome = FALSE,                # if TRUE, slopes differ by outcome; else shared across outcomes
+    # # ---- outcome-specific X? (your original DGP shared X across outcomes) ----
+    # outcome_specific_X = FALSE               # if TRUE, draw a different X for each outcome (still stored once)
 )
 
-dat$data
+head(dat$data)
 ```
 
 
@@ -62,11 +62,82 @@ source("Multi-LMM3.R") # build likelihood as its original form
 Y <- as.matrix(dat$data[, paste0("Y", 1:3)])
 X <- as.matrix(dat$data[, paste0("X", 1:6)])
 id.site <- dat$data$site
+Z <- list()
 
-fit <- peal_profile_exch_RI(Y = Y, X = X, id.site = id.site)
-fit$beta %>% matrix(nrow = px, ncol = py, byrow = F)
+for(i in 1:H){
+  count_mat = dat$data %>%
+                    filter(site == i) %>%
+                    group_by(site, patient) %>%
+                    dplyr::summarise(n_hi = n(), .groups = 'drop')
 
-sqrt(fit$sigma_u2)
-sqrt(fit$sigma2)
-fit$rho
+  Z[[i]] <- (generate_Zhv_matrix(count_mat))
+}
+
+
+fit <- MLMM.fit.RI(
+  Y = Y, X = X, Z = Z, id.site = id.site,
+  reml = TRUE,
+  corstr = "exchangeable",
+  estimate_rho = TRUE, rho_init = 0.1,
+  use_direct = TRUE,           # <-- this triggers the new direct REML path
+  verbose = TRUE
+)
 ```
+
+
+```{r}
+source("PEAL_Engine_Multi.R")
+fit_mv <- peal.fit.RI_mv(
+  Y = Y, X = X, Z = Z, id.site = id.site,
+  weights = NULL, reml = TRUE,
+  corstr = "exchangeable",        # or "independence"
+  estimate_rho = TRUE, rho_init = 0.1,  # estimate residual correlation
+  verbose = TRUE
+)
+```
+
+
+```{r}
+cbind(
+c(beta),
+c(fit$b),
+c(fit_mv$b)
+)
+
+
+rho 
+sigma_e
+c(sigma_u, sigma_v_hosp)
+
+cat("\n")
+
+(fit$rho)
+sqrt(fit$s2)
+sqrt(fit$theta * fit$s2)
+
+cat("\n")
+
+(fit_mv$rho)
+sqrt(fit_mv$s2)
+sqrt(fit_mv$theta * fit_mv$s2)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
