@@ -58,5 +58,5 @@ generate_log_data_mv <- function(
 }
 
 # Example:
-dat <- generate_log_data_mv(seed = 123, H = 10, m_hosp = rep(100,10))
-head(dat)
+# dat <- generate_log_data_mv(seed = 123, H = 10, m_hosp = rep(100,10))
+# head(dat)
